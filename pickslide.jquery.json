@@ -1,0 +1,32 @@
+{
+    "name": "pickslide",
+	"title": "jQuery PickSlide",
+	"description": "Another HSL(A) / RGB(A) Colorpicker jQuery Plugin",
+    "keywords": [
+        "colorpicker",
+        "color-picker",
+        "color",
+		"ui",
+		"hsl",
+		"hsla",
+		"rgb",
+		"rgba"
+    ],
+    "version": "1.0.0",
+    "author": {
+        "name": "Fumar Porros"
+    },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "http://opensource.org/licenses/mit-license.php"
+        }
+    ],
+    "homepage": "https://github.com/fumarporros/pickslide",
+    "demo": "http://www.beckerundschulz.de/sandbox/pick-slide/",
+    "docs": "http://www.beckerundschulz.de/sandbox/pick-slide/",
+    "download": "https://github.com/fumarporros/pickslide/archive/master.zip",
+    "dependencies": {
+        "jquery": ">=1.7"
+    }
+}
