@@ -95,7 +95,7 @@ if (window.jQuery)(function ($) {
 					onChange: function () {},
 					onClick: null,
 					hex2LowerCase: false,
-					errorColor: "Das ist kein gültiger Farbwert!\nFolgende Farbangaben sind beispielsweise gültig:\nrgb(255, 0, 0)\nrgb(25%, 50%, 20%)\nrgba(255, 0, 0, 1)\nhsl(120, 100%, 50%)\nhsla(120, 100%, 50%, 0.5)\n#ff00ff\n#ABC"
+					errorColor: "Das ist kein g?ltiger Farbwert!\nFolgende Farbangaben sind beispielsweise g?ltig:\nrgb(255, 0, 0)\nrgb(25%, 50%, 20%)\nrgba(255, 0, 0, 1)\nhsl(120, 100%, 50%)\nhsla(120, 100%, 50%, 0.5)\n#ff00ff\n#ABC"
 				}, options);
 
 				settings.ClickCount = 0;
@@ -329,6 +329,7 @@ if (window.jQuery)(function ($) {
 			$('.' + $this.data('iconID')).remove();
 			$(pid).removeData();
 			$(pid).remove();
+      $(this).unbind("click", methods.PSclick);
 		},
 		// Method //////////////////////////////////////////////////////////////////////////////////
 		PSclick: function () {
@@ -367,11 +368,11 @@ if (window.jQuery)(function ($) {
 					step: 1,
 					animate: true,
 					slide: function (event, ui) {
-						$(this).children('a').text(ui.value + '°');
+						$(this).children('a').text(ui.value + '?');
 						methods.setSlideHSL();
 					},
 					stop: function (event, ui) {
-						$(this).children('a').text(ui.value + '°');
+						$(this).children('a').text(ui.value + '?');
 						methods.setSlideHSL();
 					}
 				});
@@ -446,7 +447,7 @@ if (window.jQuery)(function ($) {
 
 				methods.initColor($(PSID).data('target').val());
 				$('.PS-origcolor').css('background-color', $(PSID).data('target').val()).attr('title', $(PSID).data('target').val());
-				
+
 				if ($(PSID).data('setStyle') == 'minimal') {
 					$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
 					$(PSID).find('.PS-color').addClass('PS-color-minimal');
@@ -511,7 +512,7 @@ if (window.jQuery)(function ($) {
 					$(PSID).addClass('PS-minimal');
 					$(PSID).data('showRGBslider', true);
 				}
-				
+
 				if ($(PSID).data('setStyle') == 'minimal-hsla') {
 					$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
 					$(PSID).find('.PS-color').addClass('PS-color-minimal');
@@ -571,7 +572,7 @@ if (window.jQuery)(function ($) {
 					$(PSID).find('.PS-slide-b').css('display', 'block');
 					$(PSID).data('showRGBslider', true);
 				}
-				
+
 				if ($(PSID).data('setStyle') == 'minimal-hsla-no-panel') {
 					$(PSID).data('noPanel', true);
 					PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
@@ -612,7 +613,7 @@ if (window.jQuery)(function ($) {
 					$(PSID).find('.ui-slider').css('display', 'none');
 					$(PSID).addClass('PS-minimal');
 				}
-				
+
 				if ($(PSID).data('noPanel') == true && $(PSID).data('namedColorsOnly') != true) {
 					$(PSID).find('.PS-display-wrap').css('display', 'none');
 					$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal-no-panel');
@@ -739,7 +740,7 @@ if (window.jQuery)(function ($) {
 			});
 			xpointer = hsla[1];
 			ypointer = hsla[2];
-			$(PSID).find('.PS-slide-h').slider('value', hsla[0]).children('a').text(hsla[0] + '°');
+			$(PSID).find('.PS-slide-h').slider('value', hsla[0]).children('a').text(hsla[0] + '?');
 			$(PSID).find('.PS-slide-s').slider('value', hsla[1]).children('a').text(hsla[1] + '%');
 			$(PSID).find('.PS-slide-l').slider('value', hsla[2]).children('a').text(hsla[2] + '%');
 			$(PSID).find('.PS-slide-a').slider('value', hsla[3]).children('a').text(hsla[3]);
@@ -868,7 +869,7 @@ if (window.jQuery)(function ($) {
 			$(PSID).find('.PS-slide-l').css('background-color', 'hsl(' + h + ', 100%, 50%)');
 			$(PSID).find('.PS-slide-a').css('background-color', 'hsl(' + h + ', ' + s + '%, ' + l + '%)');
 			$(PSID).find('.PS-display').css('background-color', 'hsla(' + h + ', 100%, 50%, 1)');
-			$(PSID).find('.PS-slide-h').slider('value', h).children('a').text(h + '°');
+			$(PSID).find('.PS-slide-h').slider('value', h).children('a').text(h + '?');
 			$(PSID).find('.PS-slide-s').slider('value', s).children('a').text(s + '%');
 			$(PSID).find('.PS-slide-l').slider('value', l).children('a').text(l + '%');
 			var hex = methods.RGB2Hex(r, g, b);
@@ -899,7 +900,7 @@ if (window.jQuery)(function ($) {
 				$(PSID).find('.PS-slide-l').css('background-color', 'hsl(' + h + ', 100%, 50%)');
 				$(PSID).find('.PS-slide-a').css('background-color', 'hsl(' + h + ', ' + s + '%, ' + l + '%)');
 				$(PSID).find('.PS-display').css('background-color', 'hsla(' + h + ', 100%, 50%, 1)');
-				$(PSID).find('.PS-slide-h').slider('value', h).children('a').text(h + '°');
+				$(PSID).find('.PS-slide-h').slider('value', h).children('a').text(h + '?');
 				$(PSID).find('.PS-slide-s').slider('value', s).children('a').text(s + '%');
 				$(PSID).find('.PS-slide-l').slider('value', l).children('a').text(l + '%');
 				$(PSID).find('.PS-hsla').val('hsla(' + h + ',' + space + s + '%,' + space + l + '%,' + space + a + ')');
