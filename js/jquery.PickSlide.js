@@ -95,7 +95,7 @@ if (window.jQuery)(function ($) {
 					onChange: function () {},
 					onClick: null,
 					hex2LowerCase: false,
-					errorColor: "Das ist kein g?ltiger Farbwert!\nFolgende Farbangaben sind beispielsweise g?ltig:\nrgb(255, 0, 0)\nrgb(25%, 50%, 20%)\nrgba(255, 0, 0, 1)\nhsl(120, 100%, 50%)\nhsla(120, 100%, 50%, 0.5)\n#ff00ff\n#ABC"
+					fallBackColor: '#ffffff',
 				}, options);
 
 				settings.ClickCount = 0;
@@ -331,384 +331,399 @@ if (window.jQuery)(function ($) {
 			$(pid).remove();
       $(this).unbind("click", methods.PSclick);
 		},
+
 		// Method //////////////////////////////////////////////////////////////////////////////////
+    PSvalidateColor: function (color) {
+      return (regEx['hex'].exec(color) != null
+				|| regEx['hsl'].exec(color) != null
+				|| regEx['hsla'].exec(color) != null
+				|| regEx['rgb'].exec(color) != null
+				|| regEx['rgba'].exec(color) != null)
+    },
+
 		PSclick: function () {
 			$this = $(this);
 			methods.resetSlide();
 			PSID = $this.data('PSID');
-			if (
-			regEx['hex'].exec($(PSID).data('target').val()) != null || regEx['hsl'].exec($(PSID).data('target').val()) != null || regEx['hsla'].exec($(PSID).data('target').val()) != null || regEx['rgb'].exec($(PSID).data('target').val()) != null || regEx['rgba'].exec($(PSID).data('target').val()) != null) {
-				$(PSID).data('ClickCount', $(PSID).data('ClickCount') + 1);
 
-				if (jQuery.isFunction($(PSID).data('onChange'))) {
-					methods.onChange = $(PSID).data('onChange');
-				}
+			// Most of the cases, this will fail, so !(||||) gives a better performance
+			if (!methods.PSvalidateColor($(PSID).data('target').val())) {
+        fallBackColor = $(PSID).data('fallBackColor')
+        if (methods.PSvalidateColor(fallBackColor)) {
+  				$(PSID).data('target').val(fallBackColor);
+        } else {
+  				$(PSID).data('target').val('#ffffff');
+        }
+			}
 
-				if ($(PSID).data('onClick') == null) {
-					if ($(PSID).is(':hidden')) {
-						$(PSID).fadeIn('slow');
-					} else {
-						$(PSID).fadeOut('slow');
-					}
-				} else if (jQuery.isFunction($(PSID).data('onClick'))) {
-					methods.onClick = $(PSID).data('onClick');
-					methods.onClick($(PSID).data('ClickCount'));
-				}
+			$(PSID).data('ClickCount', $(PSID).data('ClickCount') + 1);
 
-				if ($(PSID).data('setSpace') == true) {
-					space = ' ';
+			if (jQuery.isFunction($(PSID).data('onChange'))) {
+				methods.onChange = $(PSID).data('onChange');
+			}
+
+			if ($(PSID).data('onClick') == null) {
+				if ($(PSID).is(':hidden')) {
+					$(PSID).fadeIn('slow');
 				} else {
-					space = '';
+					$(PSID).fadeOut('slow');
 				}
+			} else if (jQuery.isFunction($(PSID).data('onClick'))) {
+				methods.onClick = $(PSID).data('onClick');
+				methods.onClick($(PSID).data('ClickCount'));
+			}
 
-				$(PSID).find('.PS-slide-h').slider({
-					value: 0,
-					min: 0,
-					max: 360,
-					step: 1,
-					animate: true,
-					slide: function (event, ui) {
-						$(this).children('a').text(ui.value + '?');
-						methods.setSlideHSL();
-					},
-					stop: function (event, ui) {
-						$(this).children('a').text(ui.value + '?');
-						methods.setSlideHSL();
-					}
+			if ($(PSID).data('setSpace') == true) {
+				space = ' ';
+			} else {
+				space = '';
+			}
+
+			$(PSID).find('.PS-slide-h').slider({
+				value: 0,
+				min: 0,
+				max: 360,
+				step: 1,
+				animate: true,
+				slide: function (event, ui) {
+					$(this).children('a').text(ui.value + '?');
+					methods.setSlideHSL();
+				},
+				stop: function (event, ui) {
+					$(this).children('a').text(ui.value + '?');
+					methods.setSlideHSL();
+				}
+			});
+
+			$(PSID).find('.PS-slide-s, .PS-slide-l').slider({
+				value: 0,
+				min: 0,
+				max: 100,
+				step: 1,
+				animate: true,
+				slide: function (event, ui) {
+					$(this).children('a').text(ui.value + '%');
+					methods.setSlideHSL();
+				},
+				stop: function (event, ui) {
+					$(this).children('a').text(ui.value + '%');
+					methods.setSlideHSL();
+				}
+			});
+
+			$(PSID).find('.PS-slide-a').slider({
+				value: 1,
+				min: 0,
+				max: 1,
+				step: 0.05,
+				animate: true,
+				slide: function (event, ui) {
+					$(this).children('a').text(ui.value);
+					methods.setSlideHSL();
+				},
+				stop: function (event, ui) {
+					$(this).children('a').text(ui.value);
+					methods.setSlideHSL();
+				}
+			});
+
+			$(PSID).find('.PS-slide-r, .PS-slide-g, .PS-slide-b').slider({
+				orientation: 'horizontal',
+				range: 'min',
+				value: 1,
+				min: 0,
+				max: 255,
+				step: 1,
+				animate: true,
+				slide: function (event, ui) {
+					$(this).children('a').text(ui.value);
+					methods.setSlideRGB();
+				},
+				stop: function (event, ui) {
+					$(this).children('a').text(ui.value);
+					methods.setSlideRGB();
+				}
+			});
+
+			$(PSID).find('.PS-slide-f').slider({
+				orientation: 'vertical',
+				range: 'min',
+				value: 2,
+				min: 0.5,
+				max: 5,
+				step: 0.05,
+				animate: true,
+				slide: function (event, ui) {
+					$(this).children('a').text(ui.value);
+					$(PSID).data('variationLevel', ui.value);
+				},
+				stop: function (event, ui) {
+					$(this).children('a').text(ui.value);
+					$(PSID).data('variationLevel', ui.value);
+				}
+			});
+
+			methods.initColor($(PSID).data('target').val());
+			$('.PS-origcolor').css('background-color', $(PSID).data('target').val()).attr('title', $(PSID).data('target').val());
+
+			if ($(PSID).data('setStyle') == 'minimal') {
+				$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
+				$(PSID).find('.PS-color').addClass('PS-color-minimal');
+				$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
+				$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
+				PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
+				$(PSID).data('showExtras', false);
+				$(PSID).data('showHistory', false);
+				$(PSID).data('showValues', false);
+				$(PSID).find('.ui-slider').css('display', 'none');
+				$(PSID).find('.PS-slide-h').css('display', 'block');
+				$(PSID).addClass('PS-minimal');
+				$(PSID).data('showHSLslider', true);
+			}
+
+			if ($(PSID).data('setStyle') == 'minimal-alpha') {
+				$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
+				$(PSID).find('.PS-color').addClass('PS-color-minimal');
+				$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
+				$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
+				PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
+				$(PSID).data('showExtras', false);
+				$(PSID).data('showHistory', false);
+				$(PSID).data('showValues', false);
+				$(PSID).find('.ui-slider').css('display', 'none');
+				$(PSID).find('.PS-slide-h').css('display', 'block');
+				$(PSID).find('.PS-slide-a').css('display', 'block');
+				$(PSID).addClass('PS-minimal');
+				$(PSID).data('showHSLslider', true);
+			}
+
+			if ($(PSID).data('setStyle') == 'minimal-hsl') {
+				$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
+				$(PSID).find('.PS-color').addClass('PS-color-minimal');
+				$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
+				$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
+				PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
+				$(PSID).data('showExtras', false);
+				$(PSID).data('showHistory', false);
+				$(PSID).data('showValues', false);
+				$(PSID).find('.ui-slider').css('display', 'none');
+				$(PSID).find('.PS-slide-h').css('display', 'block');
+				$(PSID).find('.PS-slide-s').css('display', 'block');
+				$(PSID).find('.PS-slide-l').css('display', 'block');
+				$(PSID).addClass('PS-minimal');
+				$(PSID).data('showHSLslider', true);
+			}
+
+			if ($(PSID).data('setStyle') == 'minimal-rgb') {
+				$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
+				$(PSID).find('.PS-color').addClass('PS-color-minimal');
+				$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
+				$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
+				PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
+				$(PSID).data('showExtras', false);
+				$(PSID).data('showHistory', false);
+				$(PSID).data('showValues', false);
+				$(PSID).find('.ui-slider').css('display', 'none');
+				$(PSID).find('.PS-slide-r').css('display', 'block');
+				$(PSID).find('.PS-slide-g').css('display', 'block');
+				$(PSID).find('.PS-slide-b').css('display', 'block');
+				$(PSID).addClass('PS-minimal');
+				$(PSID).data('showRGBslider', true);
+			}
+
+			if ($(PSID).data('setStyle') == 'minimal-hsla') {
+				$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
+				$(PSID).find('.PS-color').addClass('PS-color-minimal');
+				$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
+				$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
+				PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
+				$(PSID).data('showExtras', false);
+				$(PSID).data('showHistory', false);
+				$(PSID).data('showValues', false);
+				$(PSID).find('.ui-slider').css('display', 'none');
+				$(PSID).find('.PS-slide-h').css('display', 'block');
+				$(PSID).find('.PS-slide-s').css('display', 'block');
+				$(PSID).find('.PS-slide-l').css('display', 'block');
+				$(PSID).find('.PS-slide-a').css('display', 'block');
+				$(PSID).addClass('PS-minimal');
+				$(PSID).data('showHSLslider', true);
+			}
+
+			if ($(PSID).data('setStyle') == 'minimal-rgba') {
+				$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
+				$(PSID).find('.PS-color').addClass('PS-color-minimal');
+				$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
+				$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
+				PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
+				$(PSID).data('showExtras', false);
+				$(PSID).data('showHistory', false);
+				$(PSID).data('showValues', false);
+				$(PSID).find('.ui-slider').css('display', 'none');
+				$(PSID).find('.PS-slide-r').css('display', 'block');
+				$(PSID).find('.PS-slide-g').css('display', 'block');
+				$(PSID).find('.PS-slide-b').css('display', 'block');
+				$(PSID).find('.PS-slide-a').css('display', 'block');
+				$(PSID).addClass('PS-minimal');
+				$(PSID).data('showRGBslider', true);
+			}
+
+			if ($(PSID).data('setStyle') == 'minimal-hsl-no-panel') {
+				$(PSID).data('noPanel', true);
+				PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
+				$(PSID).data('showHistory', false);
+				$(PSID).data('showValues', false);
+				$(PSID).find('.ui-slider').css('display', 'none');
+				$(PSID).find('.PS-slide-h').css('display', 'block');
+				$(PSID).find('.PS-slide-s').css('display', 'block');
+				$(PSID).find('.PS-slide-l').css('display', 'block');
+				$(PSID).data('showHSLslider', true);
+			}
+
+			if ($(PSID).data('setStyle') == 'minimal-rgb-no-panel') {
+				$(PSID).data('noPanel', true);
+				PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
+				$(PSID).data('showHistory', false);
+				$(PSID).data('showValues', false);
+				$(PSID).find('.ui-slider').css('display', 'none');
+				$(PSID).find('.PS-slide-r').css('display', 'block');
+				$(PSID).find('.PS-slide-g').css('display', 'block');
+				$(PSID).find('.PS-slide-b').css('display', 'block');
+				$(PSID).data('showRGBslider', true);
+			}
+
+			if ($(PSID).data('setStyle') == 'minimal-hsla-no-panel') {
+				$(PSID).data('noPanel', true);
+				PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
+				$(PSID).data('showHistory', false);
+				$(PSID).data('showValues', false);
+				$(PSID).find('.ui-slider').css('display', 'none');
+				$(PSID).find('.PS-slide-h').css('display', 'block');
+				$(PSID).find('.PS-slide-s').css('display', 'block');
+				$(PSID).find('.PS-slide-l').css('display', 'block');
+				$(PSID).find('.PS-slide-a').css('display', 'block');
+				$(PSID).data('showHSLslider', true);
+			}
+
+			if ($(PSID).data('setStyle') == 'minimal-rgba-no-panel') {
+				$(PSID).data('noPanel', true);
+				PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
+				$(PSID).data('showHistory', false);
+				$(PSID).data('showValues', false);
+				$(PSID).find('.ui-slider').css('display', 'none');
+				$(PSID).find('.PS-slide-r').css('display', 'block');
+				$(PSID).find('.PS-slide-g').css('display', 'block');
+				$(PSID).find('.PS-slide-b').css('display', 'block');
+				$(PSID).find('.PS-slide-a').css('display', 'block');
+				$(PSID).data('showRGBslider', true);
+			}
+
+			if ($(PSID).data('setStyle') == 'minimal-palette') {
+				$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
+				$(PSID).data('namedColorsOnly', true);
+				$(PSID).data('paletteOnly', true);
+				$(PSID).find('.PS-color').addClass('PS-color-minimal');
+				$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
+				$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
+				PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
+				$(PSID).data('showExtras', false);
+				$(PSID).data('showHistory', false);
+				$(PSID).data('showValues', false);
+				$(PSID).find('.ui-slider').css('display', 'none');
+				$(PSID).addClass('PS-minimal');
+			}
+
+			if ($(PSID).data('noPanel') == true && $(PSID).data('namedColorsOnly') != true) {
+				$(PSID).find('.PS-display-wrap').css('display', 'none');
+				$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal-no-panel');
+				$(PSID).find('.PS-alpha:eq(1)').addClass('PSright');
+				$(PSID).data('showExtras', false);
+				$(PSID).addClass('PS-minimal');
+			}
+
+			if ($(PSID).data('showExtras') != true) {
+				$(PSID).find('.PS-extras-wrap').css('display', 'none');
+				$(PSID).addClass('PS-no-extras');
+			}
+
+			if ($(PSID).data('showHSLslider') != true) {
+				$(PSID).find('.PS-slide-h').css('display', 'none');
+				$(PSID).find('.PS-slide-s').css('display', 'none');
+				$(PSID).find('.PS-slide-l').css('display', 'none');
+			}
+
+			if ($(PSID).data('showRGBslider') != true) {
+				$(PSID).find('.PS-slide-r').css('display', 'none');
+				$(PSID).find('.PS-slide-g').css('display', 'none');
+				$(PSID).find('.PS-slide-b').css('display', 'none');
+			}
+
+			if ($(PSID).data('namedColorsOnly') == true) {
+				$(PSID).find('.PS-extras-wrap, .PS-pointer').remove();
+				$(PSID).find('.ui-slider').css('display', 'none');
+				$(PSID).addClass('PS-no-extras');
+				$(PSID).find('.PS-namedColors').css('display', 'block');
+				$(PSID).find('.PS-hex').attr('readonly', 'readonly');
+			}
+
+			if ($(PSID).data('showHistory') != true) {
+				$(PSID).find('.PS-history').css('display', 'none');
+			}
+
+			if ($(PSID).data('showValues') != true) {
+				$(PSID).find('.PS-values').css('display', 'none');
+			}
+
+			if (jQuery.isArray($(PSID).data('setPalette')) == true && $(PSID).data('setPalette').length > 0) {
+				var sqrtValue = Math.ceil(Math.sqrt($(PSID).data('setPalette').length));
+				var dim = 100 / sqrtValue;
+				var PSNC = '';
+				jQuery.each($(PSID).data('setPalette'), function () {
+					PSNC += '<div title="' + this + '" class="PS-named-colors" style="width: ' + dim + '%; height: ' + dim + '%;background-color: ' + this + ';"></div>';
 				});
-
-				$(PSID).find('.PS-slide-s, .PS-slide-l').slider({
-					value: 0,
-					min: 0,
-					max: 100,
-					step: 1,
-					animate: true,
-					slide: function (event, ui) {
-						$(this).children('a').text(ui.value + '%');
-						methods.setSlideHSL();
-					},
-					stop: function (event, ui) {
-						$(this).children('a').text(ui.value + '%');
-						methods.setSlideHSL();
-					}
-				});
-
-				$(PSID).find('.PS-slide-a').slider({
-					value: 1,
-					min: 0,
-					max: 1,
-					step: 0.05,
-					animate: true,
-					slide: function (event, ui) {
-						$(this).children('a').text(ui.value);
-						methods.setSlideHSL();
-					},
-					stop: function (event, ui) {
-						$(this).children('a').text(ui.value);
-						methods.setSlideHSL();
-					}
-				});
-
-				$(PSID).find('.PS-slide-r, .PS-slide-g, .PS-slide-b').slider({
-					orientation: 'horizontal',
-					range: 'min',
-					value: 1,
-					min: 0,
-					max: 255,
-					step: 1,
-					animate: true,
-					slide: function (event, ui) {
-						$(this).children('a').text(ui.value);
-						methods.setSlideRGB();
-					},
-					stop: function (event, ui) {
-						$(this).children('a').text(ui.value);
-						methods.setSlideRGB();
-					}
-				});
-
-				$(PSID).find('.PS-slide-f').slider({
-					orientation: 'vertical',
-					range: 'min',
-					value: 2,
-					min: 0.5,
-					max: 5,
-					step: 0.05,
-					animate: true,
-					slide: function (event, ui) {
-						$(this).children('a').text(ui.value);
-						$(PSID).data('variationLevel', ui.value);
-					},
-					stop: function (event, ui) {
-						$(this).children('a').text(ui.value);
-						$(PSID).data('variationLevel', ui.value);
-					}
-				});
-
-				methods.initColor($(PSID).data('target').val());
-				$('.PS-origcolor').css('background-color', $(PSID).data('target').val()).attr('title', $(PSID).data('target').val());
-
-				if ($(PSID).data('setStyle') == 'minimal') {
-					$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
-					$(PSID).find('.PS-color').addClass('PS-color-minimal');
-					$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
-					$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
-					PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
-					$(PSID).data('showExtras', false);
-					$(PSID).data('showHistory', false);
-					$(PSID).data('showValues', false);
-					$(PSID).find('.ui-slider').css('display', 'none');
-					$(PSID).find('.PS-slide-h').css('display', 'block');
-					$(PSID).addClass('PS-minimal');
-					$(PSID).data('showHSLslider', true);
-				}
-
-				if ($(PSID).data('setStyle') == 'minimal-alpha') {
-					$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
-					$(PSID).find('.PS-color').addClass('PS-color-minimal');
-					$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
-					$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
-					PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
-					$(PSID).data('showExtras', false);
-					$(PSID).data('showHistory', false);
-					$(PSID).data('showValues', false);
-					$(PSID).find('.ui-slider').css('display', 'none');
-					$(PSID).find('.PS-slide-h').css('display', 'block');
-					$(PSID).find('.PS-slide-a').css('display', 'block');
-					$(PSID).addClass('PS-minimal');
-					$(PSID).data('showHSLslider', true);
-				}
-
-				if ($(PSID).data('setStyle') == 'minimal-hsl') {
-					$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
-					$(PSID).find('.PS-color').addClass('PS-color-minimal');
-					$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
-					$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
-					PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
-					$(PSID).data('showExtras', false);
-					$(PSID).data('showHistory', false);
-					$(PSID).data('showValues', false);
-					$(PSID).find('.ui-slider').css('display', 'none');
-					$(PSID).find('.PS-slide-h').css('display', 'block');
-					$(PSID).find('.PS-slide-s').css('display', 'block');
-					$(PSID).find('.PS-slide-l').css('display', 'block');
-					$(PSID).addClass('PS-minimal');
-					$(PSID).data('showHSLslider', true);
-				}
-
-				if ($(PSID).data('setStyle') == 'minimal-rgb') {
-					$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
-					$(PSID).find('.PS-color').addClass('PS-color-minimal');
-					$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
-					$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
-					PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
-					$(PSID).data('showExtras', false);
-					$(PSID).data('showHistory', false);
-					$(PSID).data('showValues', false);
-					$(PSID).find('.ui-slider').css('display', 'none');
-					$(PSID).find('.PS-slide-r').css('display', 'block');
-					$(PSID).find('.PS-slide-g').css('display', 'block');
-					$(PSID).find('.PS-slide-b').css('display', 'block');
-					$(PSID).addClass('PS-minimal');
-					$(PSID).data('showRGBslider', true);
-				}
-
-				if ($(PSID).data('setStyle') == 'minimal-hsla') {
-					$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
-					$(PSID).find('.PS-color').addClass('PS-color-minimal');
-					$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
-					$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
-					PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
-					$(PSID).data('showExtras', false);
-					$(PSID).data('showHistory', false);
-					$(PSID).data('showValues', false);
-					$(PSID).find('.ui-slider').css('display', 'none');
-					$(PSID).find('.PS-slide-h').css('display', 'block');
-					$(PSID).find('.PS-slide-s').css('display', 'block');
-					$(PSID).find('.PS-slide-l').css('display', 'block');
-					$(PSID).find('.PS-slide-a').css('display', 'block');
-					$(PSID).addClass('PS-minimal');
-					$(PSID).data('showHSLslider', true);
-				}
-
-				if ($(PSID).data('setStyle') == 'minimal-rgba') {
-					$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
-					$(PSID).find('.PS-color').addClass('PS-color-minimal');
-					$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
-					$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
-					PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
-					$(PSID).data('showExtras', false);
-					$(PSID).data('showHistory', false);
-					$(PSID).data('showValues', false);
-					$(PSID).find('.ui-slider').css('display', 'none');
-					$(PSID).find('.PS-slide-r').css('display', 'block');
-					$(PSID).find('.PS-slide-g').css('display', 'block');
-					$(PSID).find('.PS-slide-b').css('display', 'block');
-					$(PSID).find('.PS-slide-a').css('display', 'block');
-					$(PSID).addClass('PS-minimal');
-					$(PSID).data('showRGBslider', true);
-				}
-
-				if ($(PSID).data('setStyle') == 'minimal-hsl-no-panel') {
-					$(PSID).data('noPanel', true);
-					PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
-					$(PSID).data('showHistory', false);
-					$(PSID).data('showValues', false);
-					$(PSID).find('.ui-slider').css('display', 'none');
-					$(PSID).find('.PS-slide-h').css('display', 'block');
-					$(PSID).find('.PS-slide-s').css('display', 'block');
-					$(PSID).find('.PS-slide-l').css('display', 'block');
-					$(PSID).data('showHSLslider', true);
-				}
-
-				if ($(PSID).data('setStyle') == 'minimal-rgb-no-panel') {
-					$(PSID).data('noPanel', true);
-					PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
-					$(PSID).data('showHistory', false);
-					$(PSID).data('showValues', false);
-					$(PSID).find('.ui-slider').css('display', 'none');
-					$(PSID).find('.PS-slide-r').css('display', 'block');
-					$(PSID).find('.PS-slide-g').css('display', 'block');
-					$(PSID).find('.PS-slide-b').css('display', 'block');
-					$(PSID).data('showRGBslider', true);
-				}
-
-				if ($(PSID).data('setStyle') == 'minimal-hsla-no-panel') {
-					$(PSID).data('noPanel', true);
-					PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
-					$(PSID).data('showHistory', false);
-					$(PSID).data('showValues', false);
-					$(PSID).find('.ui-slider').css('display', 'none');
-					$(PSID).find('.PS-slide-h').css('display', 'block');
-					$(PSID).find('.PS-slide-s').css('display', 'block');
-					$(PSID).find('.PS-slide-l').css('display', 'block');
-					$(PSID).find('.PS-slide-a').css('display', 'block');
-					$(PSID).data('showHSLslider', true);
-				}
-
-				if ($(PSID).data('setStyle') == 'minimal-rgba-no-panel') {
-					$(PSID).data('noPanel', true);
-					PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
-					$(PSID).data('showHistory', false);
-					$(PSID).data('showValues', false);
-					$(PSID).find('.ui-slider').css('display', 'none');
-					$(PSID).find('.PS-slide-r').css('display', 'block');
-					$(PSID).find('.PS-slide-g').css('display', 'block');
-					$(PSID).find('.PS-slide-b').css('display', 'block');
-					$(PSID).find('.PS-slide-a').css('display', 'block');
-					$(PSID).data('showRGBslider', true);
-				}
-
-				if ($(PSID).data('setStyle') == 'minimal-palette') {
-					$(PSID).find('.PS-display, .PS-namedColors').addClass('PS-display-minimal');
-					$(PSID).data('namedColorsOnly', true);
-					$(PSID).data('paletteOnly', true);
-					$(PSID).find('.PS-color').addClass('PS-color-minimal');
-					$(PSID).find('.PS-origcolor').addClass('PS-origcolor-minimal');
-					$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal');
-					PSdOne = $(PSID).find('.PS-display').innerWidth() / 100;
-					$(PSID).data('showExtras', false);
-					$(PSID).data('showHistory', false);
-					$(PSID).data('showValues', false);
-					$(PSID).find('.ui-slider').css('display', 'none');
-					$(PSID).addClass('PS-minimal');
-				}
-
-				if ($(PSID).data('noPanel') == true && $(PSID).data('namedColorsOnly') != true) {
-					$(PSID).find('.PS-display-wrap').css('display', 'none');
-					$(PSID).find('.PS-color-wrap').addClass('PS-color-wrap-minimal-no-panel');
-					$(PSID).find('.PS-alpha:eq(1)').addClass('PSright');
-					$(PSID).data('showExtras', false);
-					$(PSID).addClass('PS-minimal');
-				}
-
-				if ($(PSID).data('showExtras') != true) {
-					$(PSID).find('.PS-extras-wrap').css('display', 'none');
-					$(PSID).addClass('PS-no-extras');
-				}
-
-				if ($(PSID).data('showHSLslider') != true) {
-					$(PSID).find('.PS-slide-h').css('display', 'none');
-					$(PSID).find('.PS-slide-s').css('display', 'none');
-					$(PSID).find('.PS-slide-l').css('display', 'none');
-				}
-
-				if ($(PSID).data('showRGBslider') != true) {
-					$(PSID).find('.PS-slide-r').css('display', 'none');
-					$(PSID).find('.PS-slide-g').css('display', 'none');
-					$(PSID).find('.PS-slide-b').css('display', 'none');
-				}
-
-				if ($(PSID).data('namedColorsOnly') == true) {
+				$(PSID).find('.PS-namedColors').html(PSNC);
+				if ($(PSID).data('paletteOnly') == true) {
 					$(PSID).find('.PS-extras-wrap, .PS-pointer').remove();
 					$(PSID).find('.ui-slider').css('display', 'none');
 					$(PSID).addClass('PS-no-extras');
 					$(PSID).find('.PS-namedColors').css('display', 'block');
 					$(PSID).find('.PS-hex').attr('readonly', 'readonly');
 				}
+			}
 
-				if ($(PSID).data('showHistory') != true) {
-					$(PSID).find('.PS-history').css('display', 'none');
-				}
-
-				if ($(PSID).data('showValues') != true) {
-					$(PSID).find('.PS-values').css('display', 'none');
-				}
-
-				if (jQuery.isArray($(PSID).data('setPalette')) == true && $(PSID).data('setPalette').length > 0) {
-					var sqrtValue = Math.ceil(Math.sqrt($(PSID).data('setPalette').length));
-					var dim = 100 / sqrtValue;
-					var PSNC = '';
-					jQuery.each($(PSID).data('setPalette'), function () {
-						PSNC += '<div title="' + this + '" class="PS-named-colors" style="width: ' + dim + '%; height: ' + dim + '%;background-color: ' + this + ';"></div>';
-					});
-					$(PSID).find('.PS-namedColors').html(PSNC);
-					if ($(PSID).data('paletteOnly') == true) {
-						$(PSID).find('.PS-extras-wrap, .PS-pointer').remove();
-						$(PSID).find('.ui-slider').css('display', 'none');
-						$(PSID).addClass('PS-no-extras');
-						$(PSID).find('.PS-namedColors').css('display', 'block');
-						$(PSID).find('.PS-hex').attr('readonly', 'readonly');
-					}
-				}
-
-				if ($(PSID).data('setPickerToCenter') == true) {
-					var top = ($(document).height() - $(PSID).outerHeight()) / 2;
-					var cssObj = {
-						'top': top + 'px',
-						'left': ($(document).width() / 2) + 'px',
-						'margin-left': (($(PSID).outerWidth() / 2) * -1) + 'px'
-					};
-					var dif = ($(window).height() - $(PSID).outerHeight()) / 2;
-					var pos = top - dif;
-					$(PSID).css(cssObj);
-					$('html, body').animate({
-						scrollTop: pos
-					}, 'slow');
-				} else {
-					var posX = Math.floor($this.offset().left);
-					var posY = Math.floor($this.offset().top) + $this.outerHeight();
-					var w = $(PSID).outerWidth();
-					var h = $(PSID).outerHeight();
-					if (posY + h > $(document).height()) {
-						posY = $(document).height() - h - 10;
-					}
-					if (posX + w > $(document).width()) {
-						posX = $(document).width() - w - 10;
-					}
-					var cssObj = {
-						'top': posY + 'px',
-						'left': posX + 'px'
-					};
-					$(PSID).css(cssObj);
-					var dif = ($(window).height() - $(PSID).outerHeight()) / 2;
-					var pos = posY - dif;
-					$('html, body').animate({
-						scrollTop: pos
-					}, 'slow');
-				}
+			if ($(PSID).data('setPickerToCenter') == true) {
+				var top = ($(document).height() - $(PSID).outerHeight()) / 2;
+				var cssObj = {
+					'top': top + 'px',
+					'left': ($(document).width() / 2) + 'px',
+					'margin-left': (($(PSID).outerWidth() / 2) * -1) + 'px'
+				};
+				var dif = ($(window).height() - $(PSID).outerHeight()) / 2;
+				var pos = top - dif;
+				$(PSID).css(cssObj);
+				$('html, body').animate({
+					scrollTop: pos
+				}, 'slow');
 			} else {
-				alert($(PSID).data('errorColor'));
+				var posX = Math.floor($this.offset().left);
+				var posY = Math.floor($this.offset().top) + $this.outerHeight();
+				var w = $(PSID).outerWidth();
+				var h = $(PSID).outerHeight();
+				if (posY + h > $(document).height()) {
+					posY = $(document).height() - h - 10;
+				}
+				if (posX + w > $(document).width()) {
+					posX = $(document).width() - w - 10;
+				}
+				var cssObj = {
+					'top': posY + 'px',
+					'left': posX + 'px'
+				};
+				$(PSID).css(cssObj);
+				var dif = ($(window).height() - $(PSID).outerHeight()) / 2;
+				var pos = posY - dif;
+				$('html, body').animate({
+					scrollTop: pos
+				}, 'slow');
 			}
 		},
 		// Method //////////////////////////////////////////////////////////////////////////////////
