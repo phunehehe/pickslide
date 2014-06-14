@@ -365,15 +365,6 @@ input.PS-hex:hover, input.PS-rgba:hover, input.PS-hsla:hover {
 	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAMAAADzN3VRAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF8PDwxcXF4uLi////w4gMmAAAAAR0Uk5T////AEAqqfQAAAAvSURBVHjaYmBmZmZgwkYwAAlGrAQDLglmBlwSeAgGknWMumAIuwCUrpixEQABBgCMZQOUov3+CQAAAABJRU5ErkJggg==');
 }
 
-button {
-	float: left;
-	margin: 0px 5px 5px 5px;
-}
-
-button.right {
-	float: right;
-}
-
 .PS-named-colors {
 	float:left;
 	width: 8.333333333333333%;
